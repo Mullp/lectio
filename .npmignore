@@ -1,0 +1,12 @@
+# Source
+src/
+
+# Config
+tsconfig.json
+.eslintrc
+.eslintignore
+.gitignore
+.prettierrc
+
+# Yarn
+yarn.lock
