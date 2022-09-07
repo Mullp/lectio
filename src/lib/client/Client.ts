@@ -66,7 +66,7 @@ export class Client {
     return [...dom.querySelectorAll("#m_Content_listecontainer div p a")].map((a) => {
       return {
         name: a.innerHTML,
-        id: a.getAttribute("href")!.replace("/lectio/57/SkemaNy.aspx?type=stamklasse&klasseid=", ""),
+        id: a.getAttribute("href")?.replace("/lectio/57/SkemaNy.aspx?type=stamklasse&klasseid=", ""),
       };
     });
   }
