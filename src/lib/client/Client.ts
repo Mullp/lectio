@@ -1,10 +1,13 @@
 import puppeteer from "puppeteer";
 import { JSDOM } from "jsdom";
 
-interface SignInParams {
+interface ClientConstructorParams {
   schoolId: number;
   username: string;
   password: string;
+  debug?: {
+    headless?: boolean;
+  };
 }
 
 interface GetStudentsParams {
@@ -19,18 +22,20 @@ export class Client {
   private schoolId: number;
   private username: string;
   private password: string;
+  private debug?: { headless?: boolean } = {};
 
-  public constructor({ schoolId, username, password }: SignInParams) {
+  public constructor({ schoolId, username, password, debug }: ClientConstructorParams) {
     this.schoolId = schoolId;
     this.username = username;
     this.password = password;
+    this.debug = debug;
   }
 
   /**
    * Launch the browser
    */
   public async launch() {
-    this.browser = await puppeteer.launch({ headless: true });
+    this.browser = await puppeteer.launch({ headless: this.debug?.headless ?? true });
   }
 
   /**
@@ -56,6 +61,7 @@ export class Client {
 
   /**
    * Get all classes
+   * @returns An array of all classes
    */
   public async getAllClasses() {
     if (!this.browser) throw new Error("Browser is not launched!");
