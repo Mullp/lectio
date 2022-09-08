@@ -1,4 +1,4 @@
-import puppeteer from "puppeteer";
+import puppeteer, { Puppeteer } from "puppeteer";
 import { JSDOM } from "jsdom";
 
 interface ClientConstructorParams {
@@ -12,6 +12,7 @@ interface ClientConstructorParams {
 
 interface GetStudentsParams {
   classId: string;
+  responseHandler?: (response: puppeteer.HTTPResponse) => void;
 }
 
 /**
@@ -83,7 +84,7 @@ export class Client {
    * @param {string} class.classId - The class id
    * @returns An aray of studens
    */
-  public async getStudents({ classId }: GetStudentsParams) {
+  public async getStudents({ classId, responseHandler }: GetStudentsParams) {
     if (!this.browser) throw new Error("Browser is not launched!");
     const page = await this.browser.newPage();
     await page.goto(
@@ -93,12 +94,11 @@ export class Client {
     await page.waitForNavigation();
     const dom = new JSDOM(await page.content()).window.document;
     if (dom.querySelector("#s_m_Content_Content_additionalInfoLbl")?.textContent?.split(": ")[1] === "0") return [];
-
     await page.close();
-
+    if (responseHandler) page.on("response", (response) => responseHandler(response));
     return [...dom.querySelectorAll(".islandContent table tbody tbody tr")]
       .filter((tr) => tr.querySelector("th")?.innerHTML !== "Foto")
-      .map((tr) => {
+      .map(async (tr) => {
         const link: HTMLAnchorElement | null = tr.querySelector(".printUpscaleFontFornavn a");
         const lastName =
           tr.querySelector(".printUpscaleFontFornavn")?.nextElementSibling?.firstElementChild?.textContent;
