@@ -1,114 +1,147 @@
-import puppeteer, { Puppeteer } from "puppeteer";
+import fetch from "cross-fetch";
+import * as qs from "qs";
 import { JSDOM } from "jsdom";
+import { AssignmentManager } from "../../managers";
 
 interface ClientConstructorParams {
-  schoolId: number;
   username: string;
   password: string;
-  debug?: {
-    headless?: boolean;
-  };
-}
-
-interface GetStudentsParams {
-  classId: string;
-  responseHandler?: (response: puppeteer.HTTPResponse) => void;
+  schoolId: string;
 }
 
 /**
  * Represents the client.
  */
 export class Client {
-  private browser: puppeteer.Browser | undefined = undefined;
-  private schoolId: number;
-  private username: string;
-  private password: string;
-  private debug?: { headless?: boolean } = {};
+  #schoolId: string;
+  #username: string;
+  #password: string;
+  #studentId = "";
+  #lectiogsc = "";
+  #sessionId = "";
+  #lectioTicket = "";
 
-  public constructor({ schoolId, username, password, debug }: ClientConstructorParams) {
-    this.schoolId = schoolId;
-    this.username = username;
-    this.password = password;
-    this.debug = debug;
+  public assignment: AssignmentManager;
+
+  public constructor({ schoolId, username, password }: ClientConstructorParams) {
+    this.#schoolId = schoolId;
+    this.#username = username;
+    this.#password = password;
+
+    this.assignment = new AssignmentManager(this);
   }
 
   /**
-   * Launch the browser
+   * Get the studentId
+   * @return {string} - The studentId
    */
-  public async launch() {
-    this.browser = await puppeteer.launch({ headless: this.debug?.headless ?? true });
+  public get studentId(): string {
+    return this.#studentId;
   }
 
   /**
-   * Close the browser
+   * Get the schoolId
+   * @return {string} - The schoolId
    */
-  public async close() {
-    this.browser?.close();
+  public get schoolId(): string {
+    return this.#schoolId;
   }
 
   /**
-   * Sign in to Lectio
+   * Get the sessionId
+   * @return {string} - The sessionId
    */
-  public async signIn() {
-    if (!this.browser) throw new Error("Browser is not launched!");
-    const page = await this.browser.newPage();
-    await page.goto(`https://www.lectio.dk/lectio/${this.schoolId}/forside.aspx`);
-    await page.type("#username", this.username);
-    await page.type("#password", this.password);
-    await page.click("#m_Content_AutologinCbx");
-    await page.click("#m_Content_submitbtn2");
-    await page.close();
+  public get sessionId(): string {
+    return this.#sessionId;
   }
 
   /**
-   * Get all classes
-   * @returns An array of all classes
+   * Get the lectiogsc
+   * @return {string} - The lectiogsc
    */
-  public async getAllClasses() {
-    if (!this.browser) throw new Error("Browser is not launched!");
-    const page = await this.browser.newPage();
-    await page.goto(`https://www.lectio.dk/lectio/${this.schoolId}/FindSkema.aspx?type=stamklasse`);
-    const dom = new JSDOM(await page.content()).window.document;
-    await page.close();
-    return [...dom.querySelectorAll("#m_Content_listecontainer div p a")].map((a) => {
-      return {
-        name: a.innerHTML,
-        id: a.getAttribute("href")?.replace("/lectio/57/SkemaNy.aspx?type=stamklasse&klasseid=", ""),
-      };
-    });
+  public get lectiogsc(): string {
+    return this.#lectiogsc;
   }
 
   /**
-   * Gets all students in a class
-   * @param {GetStudentsParams} class - The class to get the students from
-   * @param {string} class.classId - The class id
-   * @returns An aray of studens
+   * Get the username
+   * @return {string} - The username
    */
-  public async getStudents({ classId, responseHandler }: GetStudentsParams) {
-    if (!this.browser) throw new Error("Browser is not launched!");
-    const page = await this.browser.newPage();
-    await page.goto(
-      `https://www.lectio.dk/lectio/${this.schoolId}/subnav/members.aspx?klasseid=${classId}&showstudents=1`,
-    );
-    await page.click("#s_m_Content_Content_IsPrintingHiResPicturesCB");
-    await page.waitForNavigation();
-    const dom = new JSDOM(await page.content()).window.document;
-    if (dom.querySelector("#s_m_Content_Content_additionalInfoLbl")?.textContent?.split(": ")[1] === "0") return [];
-    await page.close();
-    if (responseHandler) page.on("response", (response) => responseHandler(response));
-    return [...dom.querySelectorAll(".islandContent table tbody tbody tr")]
-      .filter((tr) => tr.querySelector("th")?.innerHTML !== "Foto")
-      .map(async (tr) => {
-        const link: HTMLAnchorElement | null = tr.querySelector(".printUpscaleFontFornavn a");
-        const lastName =
-          tr.querySelector(".printUpscaleFontFornavn")?.nextElementSibling?.firstElementChild?.textContent;
-        const image: HTMLImageElement | null = tr.querySelector("td img");
-        return {
-          studentId: link?.href.replace("/lectio/57/SkemaNy.aspx?type=elev&elevid=", ""),
-          firstName: link?.textContent,
-          lastName: lastName,
-          imageUrl: image?.src,
-        };
+  public get username(): string {
+    return this.#username;
+  }
+
+  /**
+   * Authenticate the user
+   * @return {boolean} - Whether the login was successful or not
+   */
+  public async authenticate() {
+    const url = `https://www.lectio.dk/lectio/${this.#schoolId}/login.aspx`;
+
+    const requestBody = await fetch(url)
+      .then((res) => res.text())
+      .then((res) => this.extractRequestBody(res))
+      .catch((error) => {
+        throw error;
       });
+
+    await fetch(url, {
+      method: "POST",
+      headers: { "content-type": "application/x-www-form-urlencoded" },
+      body: qs.stringify(requestBody),
+      redirect: "manual",
+    })
+      .then(async (res) => {
+        const resHtml = await res.text();
+        if (resHtml.includes("Der er ikke oprettet en adgangskode til dette login. Kontakt en lærer."))
+          throw new Error("No user with the specified username exists for the specified school.");
+        else if (resHtml.includes("Fejl i Brugernavn og/eller adgangskode. Prøv igen eller:"))
+          throw new Error("Wrong password for the specified username.");
+
+        const cookies = res.headers.get("set-cookie")?.split("; ");
+
+        if (!cookies) return;
+
+        this.#lectiogsc = cookies[0].split("lectiogsc=")[1];
+        this.#sessionId = cookies[3].split("ASP.NET_SessionId=")[1];
+        this.#lectioTicket = cookies[8].split("LectioTicket=")[1];
+      })
+      .catch((error) => {
+        throw error;
+      });
+
+    await fetch(`https://www.lectio.dk/lectio/${this.#schoolId}/forside.aspx`, {
+      headers: {
+        Cookie: `ASP.NET_SessionId=${this.#sessionId}`,
+      },
+    })
+      .then((res) => res.text())
+      .then((res) => {
+        const dom = new JSDOM(res).window.document;
+        this.#studentId = (dom.querySelector("body meta[name=\"msapplication-starturl\"]") as HTMLMetaElement).content.replace("/lectio/57/forside.aspx?elevid=", "");
+      })
+      .catch((error) => {
+        throw error;
+      });
+
+    return !!this.#studentId && !!this.#lectiogsc && !!this.#lectioTicket && !!this.#sessionId;
+  }
+
+  /**
+   * Extract the request body from the /login.aspx page
+   * @param pageBody - The HTML of the page
+   * @private
+   */
+  private extractRequestBody(pageBody: string) {
+    const dom = new JSDOM(pageBody).window.document;
+
+    return {
+      __EVENTTARGET: "m$Content$submitbtn2",
+      __EVENTARGUMENT: "",
+      __VIEWSTATEX: (dom.querySelector("#__VIEWSTATEX") as HTMLInputElement | null)?.value,
+      __EVENTVALIDATION: (dom.querySelector("#__EVENTVALIDATION") as HTMLInputElement | null)?.value,
+      m$Content$username: this.#username,
+      m$Content$password: this.#password,
+    };
   }
 }
