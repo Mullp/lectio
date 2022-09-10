@@ -1,11 +1,7 @@
 import { Client } from "../../index";
 
-// Bad test btw
-test("Sign in", async () => {
-  const lectio = new Client({ schoolId: 1, username: "", password: "" });
-  await lectio.launch();
-  await lectio.signIn();
-  await lectio.close();
+const lectio = new Client({ schoolId: "", username: "", password: "" });
 
-  expect(true).toBeTruthy();
+test("Sign in", async () => {
+  expect(await lectio.authenticate()).toBeTruthy();
 }, 200000);
