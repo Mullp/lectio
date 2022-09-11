@@ -79,9 +79,10 @@ export class Client {
 
   /**
    * Authenticate the user
-   * @return {boolean} - Whether the login was successful or not
+   * @async
+   * @return {Promise<boolean>} - Whether the login was successful or not
    */
-  public async authenticate() {
+  public async authenticate(): Promise<boolean> {
     const url = `https://www.lectio.dk/lectio/${this.#schoolId}/login.aspx`;
 
     const requestBody = await fetch(url)

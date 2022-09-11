@@ -41,7 +41,10 @@ export class AssignmentManager extends BaseManager {
                 .href
                 .split("exerciseid=")[1]
                 .split("&")[0],
-              group: cells[1].firstElementChild?.textContent ?? "",
+              group: {
+                name: cells[1].firstElementChild?.textContent ?? "",
+                id: cells[1].firstElementChild?.getAttribute("data-lectiocontextcard")?.toString().substring(2) ?? "",
+              },
               title: cells[2].firstElementChild?.firstElementChild?.textContent ?? "",
               due: moment(cells[3].textContent ?? "", "DD/MM-YYYY hh:mm").toDate(),
               studentTime: Number(cells[4].textContent?.replace(",", ".")),

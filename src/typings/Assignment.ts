@@ -1,9 +1,11 @@
+import { IGroup } from "./Group";
+
 export type AssignmentStatus = "done" | "waiting";
 export type AssignmentAwaiting = "student" | "teacher";
 
 export interface IAssignmentLight {
   assignmentId: string;
-  group: string;
+  group: IGroup;
   title: string;
   due: Date;
   studentTime: number;
