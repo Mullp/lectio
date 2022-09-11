@@ -20,6 +20,9 @@ export class AssignmentManager extends BaseManager {
     this.client = client;
   }
 
+  /**
+   * Get all assignments
+   */
   public async getAll() {
     return await fetch(`https://www.lectio.dk/lectio/${this.client.schoolId}/OpgaverElev.aspx?elevid=${this.client.studentId}`, {
       method: "POST",
