@@ -21,14 +21,12 @@ export class Client {
   #sessionId = "";
   #lectioTicket = "";
 
-  public assignment: AssignmentManager;
+  #assignment = new AssignmentManager(this);
 
   public constructor({ schoolId, username, password }: ClientConstructorParams) {
     this.#schoolId = schoolId;
     this.#username = username;
     this.#password = password;
-
-    this.assignment = new AssignmentManager(this);
   }
 
   /**
@@ -69,6 +67,14 @@ export class Client {
    */
   public get username(): string {
     return this.#username;
+  }
+
+  /**
+   * get the AssignmentManager
+   * @return {AssignmentManager} - The AssignmentManager
+   */
+  public get assignment(): AssignmentManager {
+    return this.#assignment;
   }
 
   /**
