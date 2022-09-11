@@ -103,6 +103,10 @@ export class Client {
           throw new Error("No user with the specified username exists for the specified school.");
         else if (resHtml.includes("Fejl i Brugernavn og/eller adgangskode. Prøv igen eller:"))
           throw new Error("Wrong password for the specified username.");
+        else if (resHtml.includes("Fejl - Lectio"))
+          throw new Error("Authentication failed.");
+        else if (res.headers.get("location") === "/lectio/CRAPPYLECTIOURL_login.aspx")
+          throw new Error("Page does not exist.");
 
         const cookies = res.headers.get("set-cookie")?.split("; ");
 
