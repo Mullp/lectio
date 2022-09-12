@@ -21,6 +21,14 @@ export class AssignmentManager extends BaseManager {
   }
 
   /**
+   * Get an assignment
+   * @param assignmentId
+   */
+  public async get(assignmentId: string) { // TODO: Implement method.
+    throw new Error("Method not yet implemented");
+  }
+
+  /**
    * Get all assignments
    */
   public async getAll() {
