@@ -21,6 +21,28 @@ export class AssignmentManager extends BaseManager {
   }
 
   /**
+   * Get an assignment by Id
+   * @param assignmentId - The Id of the assignment
+   * @deprecated
+   */
+  public async get(assignmentId: string) {
+    throw new Error("Method not implemented");
+
+    return await fetch(`https://www.lectio.dk/lectio/${this.client.schoolId}/ElevAflevering.aspx?elevid=${this.client.studentId}&exerciseid=${assignmentId}&prevurl=OpgaverElev.aspx`, {
+      headers: {
+        Cookie: `ASP.NET_SessionId=${this.client.sessionId};`,
+      }
+    })
+      .then((res) => res.text())
+      .then((res) => {
+        const dom = new JSDOM(res).window.document;
+      })
+      .catch((error) => {
+        throw error;
+      });
+  }
+
+  /**
    * Get all assignments
    */
   public async getAll() {
