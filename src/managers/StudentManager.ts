@@ -72,7 +72,7 @@ export class StudentManager extends BaseManager {
           .map((tr) => {
             const anchorElement: HTMLAnchorElement | null = tr.querySelector(".printUpscaleFontFornavn a");
             const lastName = tr.querySelector(".printUpscaleFontFornavn")?.nextElementSibling?.firstElementChild?.textContent;
-            const imageElement: HTMLImageElement | null = tr.querySelector("td img");
+            const imageElement: HTMLImageElement | null = tr.querySelector("td img#s_m_Content_Content_laerereleverpanel_alm_gv_ctl02_Thumbview1thumbimage");
 
             return new Student(this.client, {
               studentId: anchorElement?.href.split("elevid=")[1] ?? "",
