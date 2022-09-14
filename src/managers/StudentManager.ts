@@ -1,7 +1,7 @@
 import { BaseManager } from "./BaseManager";
 import { Client } from "../lib";
+import { Student } from "../classes";
 import fetch from "cross-fetch";
-import { Student } from "../classes/Student";
 import { JSDOM } from "jsdom";
 
 export class StudentManager extends BaseManager {

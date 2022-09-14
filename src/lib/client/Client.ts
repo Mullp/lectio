@@ -1,8 +1,7 @@
 import fetch from "cross-fetch";
 import * as qs from "qs";
 import { JSDOM } from "jsdom";
-import { AssignmentManager } from "../../managers";
-import { StudentManager } from "../../managers/StudentManager";
+import { AssignmentManager, StudentManager } from "../../managers";
 
 interface ClientConstructorParams {
   username: string;

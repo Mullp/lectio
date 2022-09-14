@@ -1,7 +1,6 @@
 import { BaseClass } from "./Base";
-import { IGroup } from "../typings";
+import { IGroup, IGetStudentImageParams, IStudent } from "../typings";
 import { Client } from "../lib";
-import { IGetStudentImageParams, IStudent } from "../typings/Student";
 import fetch from "cross-fetch";
 
 export class Student extends BaseClass {

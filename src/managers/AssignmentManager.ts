@@ -1,6 +1,6 @@
 import { BaseManager } from "./BaseManager";
 import { Client } from "../lib";
-import { AssignmentLight } from "../classes/AssignmentLight";
+import { AssignmentLight } from "../classes";
 import fetch from "cross-fetch";
 import { JSDOM } from "jsdom";
 import moment from "moment";
