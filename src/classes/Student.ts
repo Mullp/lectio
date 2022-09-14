@@ -2,6 +2,7 @@ import { BaseClass } from "./Base";
 import { IGroup } from "../typings";
 import { Client } from "../lib";
 import { IGetStudentImageParams, IStudent } from "../typings/Student";
+import fetch from "cross-fetch";
 
 export class Student extends BaseClass {
   /**
@@ -40,7 +41,20 @@ export class Student extends BaseClass {
   /**
    * Get the url of the image
    */
-  public getImageUrl({ fullSize = true }: IGetStudentImageParams): string {
+  public getImageUrl({ fullSize }: IGetStudentImageParams = { fullSize: true }): string {
     return `https://www.lectio.dk/lectio/${this.client.schoolId}/GetImage.aspx?pictureid=${this.imageId}&${fullSize ? "fullsize=1" : ""}`;
+  }
+
+  /**
+   * Get the image as an {@link ArrayBuffer}
+   * @param IGetStudentImageParams - Get image params
+   * @return {ArrayBuffer} - yes
+   */
+  public async getImage({ fullSize }: IGetStudentImageParams = { fullSize: true }) {
+    return await fetch(this.getImageUrl({ fullSize: fullSize }))
+      .then((res) => res.arrayBuffer())
+      .catch((error) => {
+        throw error;
+      });
   }
 }
