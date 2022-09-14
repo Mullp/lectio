@@ -16,3 +16,9 @@ export interface IAssignmentLight {
   grade: string;
   studentNote: string;
 }
+
+export interface IAssignment extends IAssignmentLight {
+  gradingScale: string;
+  teacher: string;
+  describeInLesson: boolean;
+}
