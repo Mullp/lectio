@@ -1,4 +1,5 @@
 import { Client } from "../../index";
+import { Student } from "../../classes/Student";
 
 const lectio = new Client({
   schoolId: process.env.LECTIO_SCHOOLID as string,
@@ -8,4 +9,8 @@ const lectio = new Client({
 
 test("Sign in", async () => {
   expect(await lectio.authenticate()).toBeTruthy();
-}, 200000);
+}, 20000);
+
+test("Get student", async () => {
+  expect(await lectio.student.get(lectio.studentId)).toBeInstanceOf(Student);
+}, 20000);

@@ -1,4 +1,4 @@
 export interface IGroup {
-  name: string,
-  id: string
+  name?: string,
+  id?: string
 }
