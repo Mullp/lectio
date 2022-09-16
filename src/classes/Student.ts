@@ -47,11 +47,11 @@ export class Student extends BaseClass {
   /**
    * Get the image as an {@link ArrayBuffer}
    * @param IGetStudentImageParams - Get image params
-   * @return {ArrayBuffer} - yes
+   * @return {Promise<Blob>} - The image as a blob
    */
   public async getImage({ fullSize }: IGetStudentImageParams = { fullSize: true }) {
     return await fetch(this.getImageUrl({ fullSize: fullSize }))
-      .then((res) => res.arrayBuffer())
+      .then((res) => res.blob())
       .catch((error) => {
         throw error;
       });
