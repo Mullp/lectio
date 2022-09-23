@@ -42,6 +42,4 @@ export class StudentManager extends BaseManager {
         throw error;
       });
   }
-
-
 }
