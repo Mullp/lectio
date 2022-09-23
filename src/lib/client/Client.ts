@@ -1,7 +1,7 @@
 import fetch from "cross-fetch";
 import * as qs from "qs";
 import { JSDOM } from "jsdom";
-import { AssignmentManager, StudentManager } from "../../managers";
+import { AssignmentManager, GroupManager, StudentManager } from "../../managers";
 
 interface ClientConstructorParams {
   username: string;
@@ -23,6 +23,7 @@ export class Client {
 
   #assignment = new AssignmentManager(this);
   #student = new StudentManager(this);
+  #group = new GroupManager(this);
 
   public constructor({ schoolId, username, password }: ClientConstructorParams) {
     this.#schoolId = schoolId;
@@ -84,6 +85,14 @@ export class Client {
    */
   public get student(): StudentManager {
     return this.#student;
+  }
+
+  /**
+   * Get the GroupManager
+   * @return {GroupManager} - The GroupManager
+   */
+  public get group(): GroupManager {
+    return this.#group;
   }
 
   /**
