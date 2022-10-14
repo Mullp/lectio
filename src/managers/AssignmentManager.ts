@@ -68,7 +68,7 @@ export class AssignmentManager extends BaseManager {
                 .split("&")[0],
               group: {
                 name: cells[1].firstElementChild?.textContent ?? "",
-                id: cells[1].firstElementChild?.getAttribute("data-lectiocontextcard")?.toString().substring(2) ?? "",
+                groupId: cells[1].firstElementChild?.getAttribute("data-lectiocontextcard")?.toString().substring(2) ?? "",
               },
               title: cells[2].firstElementChild?.firstElementChild?.textContent ?? "",
               due: moment(cells[3].textContent ?? "", "DD/MM-YYYY hh:mm").toDate(),
